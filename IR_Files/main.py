@@ -7,18 +7,26 @@ from beir_ranking import rank_documents
 from utils import *
 import os
 
-dataset = "nfcorpus"  # Change to dataset being used
+dataset = "scifact"  # SciFact dataset for Assignment 1
 doc_folder_path = dataset + '/corpus.jsonl'
 query_file_path = dataset + '/queries.jsonl'
+stopwords_path = 'List of Stopwords.html'
 index_file_path = 'inverted_index.json'
 preprocessed_docs_path = 'preprocessed_documents.json'
 preprocessed_queries_path = 'preprocessed_queries.json'
 
+# Preprocessing settings
+USE_STEMMING = True  # Set to True to enable Porter stemming
+
 start_time = time.time()
+
+# Load stopwords
+print("Loading stopwords")
+stopwords = load_stopwords(stopwords_path)
+print(f"Loaded {len(stopwords)} stopwords")
 
 print("Parsing documents")
 documents = []
-queries = parse_queries_from_file(query_file_path)
 
 # Preprocess documents and queries
 if os.path.exists(preprocessed_docs_path):
@@ -27,14 +35,20 @@ if os.path.exists(preprocessed_docs_path):
 else:
     print("Preprocessing documents")
     documents = parse_documents_from_file(doc_folder_path)
-    documents = preprocess_documents(parse_documents_from_file(doc_folder_path))
+    documents = preprocess_documents(documents, stopwords, stem=USE_STEMMING)
     save_preprocessed_data(documents, preprocessed_docs_path)
+
 if os.path.exists(preprocessed_queries_path):
     print("Loading preprocessed queries")
     queries = load_preprocessed_data(preprocessed_queries_path)
 else:
     print("Preprocessing queries")
-    queries = preprocess_queries(parse_queries_from_file(query_file_path))
+    # Parse all queries first
+    all_queries = parse_queries_from_file(query_file_path)
+    # Filter for TEST queries only (odd-numbered: 1, 3, 5, ...)
+    queries = [q for q in all_queries if int(q['num']) % 2 == 1]
+    print(f"Filtered to {len(queries)} test queries (odd IDs only)")
+    queries = preprocess_queries(queries, stopwords, stem=USE_STEMMING)
     save_preprocessed_data(queries, preprocessed_queries_path)
 
 start_time = time.time()
