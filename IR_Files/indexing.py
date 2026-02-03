@@ -13,7 +13,9 @@ def build_inverted_index(documents):
             if doc_id not in inverted_index[token]:
                 inverted_index[token][doc_id] = 0
             inverted_index[token][doc_id] += 1
-    return inverted_index
+    return inverted_index 
+
+
 
 def calculate_document_lengths(documents):
     """
