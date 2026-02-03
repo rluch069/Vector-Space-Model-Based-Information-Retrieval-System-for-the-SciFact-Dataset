@@ -1,16 +1,15 @@
+from collections import defaultdict
 import json
 
 def build_inverted_index(documents):
     """
     Build an inverted index from the preprocessed documents
     """
-    inverted_index = {}
+    inverted_index = defaultdict(dict)
     for doc in documents:
         doc_id = doc['DOCNO']
         text_tokens = doc['TEXT']
         for token in text_tokens:
-            if token not in inverted_index:
-                inverted_index[token] = {}
             if doc_id not in inverted_index[token]:
                 inverted_index[token][doc_id] = 0
             inverted_index[token][doc_id] += 1
@@ -23,16 +22,36 @@ def calculate_document_lengths(documents):
     doc_lengths = {}
     for doc in documents:
         doc_id = doc['DOCNO']
-        text_tokens = doc['TEXT']
-        doc_length = len(text_tokens)
-        doc_lengths[doc_id] = doc_length
+        doc_lengths[doc_id] = len(doc['TEXT'])
     return doc_lengths
 
-def save_inverted_index(inverted_index, file_path):
+def calculate_document_frequencies(inverted_index):
+    """
+    Calculate document frequency for each term in the inverted index
+    """
+    doc_freqs = {}
+    for term, postings in inverted_index.items():
+        doc_freqs[term] = len(postings)
+    return doc_freqs
+
+def get_corpus_size(documents):
+    """
+    Get the total number of documents in the corpus
+    """
+    return len(documents)
+
+def save_inverted_index(inverted_index, doc_freqs, doc_lengths, file_path):
+    index_data = {
+        'inverted_index': inverted_index,
+        'doc_freqs': doc_freqs,
+        'doc_lengths': doc_lengths
+    }
     with open(file_path, 'w', encoding='utf-8') as file:
-        json.dump(inverted_index, file, indent=4)
+        json.dump(index_data, file)
 
 def load_inverted_index(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
-        inverted_index = json.load(file)
-    return inverted_index
+        inverted_data = json.load(file)
+    return (inverted_data['inverted_index'],
+            inverted_data['doc_freqs'],
+            inverted_data['doc_lengths'])
