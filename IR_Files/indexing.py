@@ -15,6 +15,7 @@ def build_inverted_index(documents):
             inverted_index[token][doc_id] += 1
     return inverted_index
 
+
 def calculate_document_lengths(documents):
     """
     Calculate the length of each document based on the number of terms
