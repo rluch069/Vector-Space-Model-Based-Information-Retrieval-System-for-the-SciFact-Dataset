@@ -6,7 +6,7 @@ def build_inverted_index(documents):
     Build an inverted index from the preprocessed documents
     """
     inverted_index = defaultdict(dict)
-    for doc in documents:
+    for doc in documents: 
         doc_id = doc['DOCNO']
         text_tokens = doc['TEXT']
         for token in text_tokens:
@@ -14,7 +14,6 @@ def build_inverted_index(documents):
                 inverted_index[token][doc_id] = 0
             inverted_index[token][doc_id] += 1
     return inverted_index
-
 
 def calculate_document_lengths(documents):
     """
